@@ -1,17 +1,20 @@
 #!/usr/bin/env python
+try:
+    from optparse import OptionParser, IndentedHelpFormatter, OptionGroup
+    from blinkstick import BlinkStick
+except ModuleNotFoundError:
+    exit("cli is broken for now, check back later!")
 
-from optparse import OptionParser, IndentedHelpFormatter, OptionGroup
-from blinkstick import blinkstick
 import textwrap
 import sys
-import time
 import logging
 logging.basicConfig()
 
 
 class IndentedHelpFormatterWithNL(IndentedHelpFormatter):
     def format_description(self, description):
-        if not description: return ""
+        if not description:
+            return ""
 
         desc_width = self.width - self.current_indent
         indent = " " * self.current_indent
@@ -70,7 +73,9 @@ class IndentedHelpFormatterWithNL(IndentedHelpFormatter):
         return "".join(result)
 
     def format_usage(self, usage):
-        return "BlinkStick control script %s\n(c) Agile Innovative Ltd 2013-2014\n\n%s" % (blinkstick.get_blinkstick_package_version(), IndentedHelpFormatter.format_usage(self, usage))
+        return "BlinkStick control script %s\n(c) Agile Innovative Ltd 2013-2014\n\n%s" % (
+            BlinkStick.get_blinkstick_package_version(), IndentedHelpFormatter.format_usage(self, usage)
+        )
 
 
 def print_info(stick):
@@ -89,12 +94,10 @@ def print_info(stick):
 
 
 def main():
-    global options
-    global sticks
+    # global options
+    # global sticks
 
-    parser = OptionParser(usage="usage: %prog [options] [color]",
-        formatter=IndentedHelpFormatterWithNL()
-    )
+    parser = OptionParser(usage="usage: %prog [options] [color]", formatter=IndentedHelpFormatterWithNL())
 
     parser.add_option("-i", "--info",
                       action="store_true", dest="info",
@@ -102,123 +105,121 @@ def main():
 
     parser.add_option("-s", "--serial",
                       dest="serial",
-                      help="Select device by serial number. If unspecified, action will be performed on all BlinkSticks.")
+                      help="Select device by serial number. If unspecified, action will be performed on all BlinkSticks"
+                      )
 
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose",
                       help="Display debug output")
 
-
-    group = OptionGroup(parser, "Change color",
-                    "These options control the color of the device  ")
+    group = OptionGroup(parser, "Change color", "These options control the color of the device")
 
     group.add_option("--channel",
-                      default=0, dest="channel",
-                      help="Select channel. Applies only to BlinkStick Pro.")
+                     default=0, dest="channel",
+                     help="Select channel. Applies only to BlinkStick Pro.")
 
     group.add_option("--index",
-                      default=0, dest="index",
-                      help="Select index. Applies only to BlinkStick Pro.")
+                     default=0, dest="index",
+                     help="Select index. Applies only to BlinkStick Pro.")
 
     group.add_option("--brightness",
-                      default=100, dest="limit",
-                      help="Limit the brightness of the color 0..100")
+                     default=100, dest="limit",
+                     help="Limit the brightness of the color 0..100")
 
     group.add_option("--limit",
-                      default=100, dest="limit",
-                      help="Alias to --brightness option")
+                     default=100, dest="limit",
+                     help="Alias to --brightness option")
 
     group.add_option("--set-color",
-                      dest="color",
-                      help="Set the color for the device. This can also be the last argument for the script. "
-                           "The value can either be a named color, hex value, 'random' or 'off'.\n\n"
-                           "CSS color names are defined http://www.w3.org/TR/css3-color/ e.g. red, green, blue. "
-                           "Specify color using hexadecimal color value e.g. 'FF3366'")
+                     dest="color",
+                     help="Set the color for the device. This can also be the last argument for the script. "
+                          "The value can either be a named color, hex value, 'random' or 'off'.\n\n"
+                          "CSS color names are defined http://www.w3.org/TR/css3-color/ e.g. red, green, blue. "
+                          "Specify color using hexadecimal color value e.g. 'FF3366'")
+
     group.add_option("--inverse",
-                      action="store_true", dest="inverse",
-                      help="Control BlinkSticks in inverse mode")
+                     action="store_true", dest="inverse",
+                     help="Control BlinkSticks in inverse mode")
 
     group.add_option("--set-led-count",
-                      dest="led_count",
-                      help="Set the number of LEDs to control for supported devices.")
+                     dest="led_count",
+                     help="Set the number of LEDs to control for supported devices.")
 
     parser.add_option_group(group)
 
-    group = OptionGroup(parser, "Control animations",
-                    "These options will blink, morph or pulse selected color.  ")
+    group = OptionGroup(parser, "Control animations", "These options will blink, morph or pulse selected color.  ")
 
     group.add_option("--blink",
-                      dest="blink",
-                      action='store_true',
-                      help="Blink LED (requires --set-color or color set as last argument, and optionally --delay)")
+                     dest="blink",
+                     action='store_true',
+                     help="Blink LED (requires --set-color or color set as last argument, and optionally --delay)")
 
     group.add_option("--pulse",
-                      dest="pulse",
-                      action='store_true',
-                      help="Pulse LED (requires --set-color or color set as last argument, and optionally --duration).")
+                     dest="pulse",
+                     action='store_true',
+                     help="Pulse LED (requires --set-color or color set as last argument, and optionally --duration).")
 
     group.add_option("--morph",
-                      dest="morph",
-                      action='store_true',
-                      help="Morph to specified color (requires --set-color or color set as last argument, and optionally --duration).")
+                     dest="morph",
+                     action='store_true',
+                     help="Morph to specified color (requires --set-color or color set as last argument, "
+                          "and optionally --duration).")
 
     group.add_option("--duration",
-                      dest="duration",
-                      default=1000,
-                      help="Set duration of transition in milliseconds (use with --morph and --pulse).")
+                     dest="duration",
+                     default=1000,
+                     help="Set duration of transition in milliseconds (use with --morph and --pulse).")
 
     group.add_option("--delay",
-                      dest="delay",
-                      default=500,
-                      help="Set time in milliseconds to light LED for (use with --blink).")
+                     dest="delay",
+                     default=500,
+                     help="Set time in milliseconds to light LED for (use with --blink).")
 
     group.add_option("--repeats",
-                      dest="repeats",
-                      default=1,
-                      help="Number of repetitions (use with --blink and --pulse).")
+                     dest="repeats",
+                     default=1,
+                     help="Number of repetitions (use with --blink and --pulse).")
 
     parser.add_option_group(group)
 
     group = OptionGroup(parser, "Device data and behaviour",
-                    "These options will change device mode and data stored internally.  ")
+                        "These options will change device mode and data stored internally.")
 
     group.add_option("--set-mode",
-                      default=0, dest="mode",
-                      help="Set mode for BlinkStick Pro:\n\n    0 - default\n\n    1 - inverse\n\n    2 - ws2812\n\n    3 - ws2812 mirror")
+                     default=0, dest="mode",
+                     help="Set mode for BlinkStick Pro:\n\n    0 - default\n\n    1 - inverse\n\n    2 - ws2812\n\n   "
+                          " 3 - ws2812 mirror")
 
     group.add_option("--set-infoblock1",
-                      dest="infoblock1",
-                      help="Set the first info block for the device.")
+                     dest="infoblock1",
+                     help="Set the first info block for the device.")
 
     group.add_option("--set-infoblock2",
-                      dest="infoblock2",
-                      help="Set the second info block for the device.")
+                     dest="infoblock2",
+                     help="Set the second info block for the device.")
 
     parser.add_option_group(group)
 
-    group = OptionGroup(parser, "Advanced options",
-                    "")
+    group = OptionGroup(parser, "Advanced options", "")
 
     group.add_option("--add-udev-rule",
-                      action="store_true", dest="udev",
-                      help="Add udev rule to access BlinkSticks without root permissions. Must be run as root.")
+                     action="store_true", dest="udev",
+                     help="Add udev rule to access BlinkSticks without root permissions. Must be run as root.")
 
     parser.add_option_group(group)
-
-
 
     (options, args) = parser.parse_args()
 
     if options.serial is None:
-        sticks = blinkstick.find_all()
+        sticks = BlinkStick.get_all()
     else:
-        sticks = [blinkstick.find_by_serial(options.serial)]
+        sticks = [BlinkStick.get_by_serial(options.serial)]
 
         if len(sticks) == 0:
             print("BlinkStick with serial number " + options.device + " not found...")
             return 64
 
-    #Global action
+    # Global action
     if options.udev:
 
         try:
@@ -244,7 +245,7 @@ def main():
 
         stick.set_error_reporting(False)
 
-    #Actions here work on all BlinkSticks
+    # Actions here work on all BlinkSticks
     for stick in sticks:
         if options.infoblock1:
             stick.set_info_block1(options.infoblock1)
@@ -261,7 +262,7 @@ def main():
         elif options.led_count:
             led_count = int(options.led_count)
 
-            if led_count > 0 and led_count <= 32:
+            if 0 < led_count <= 32:
                 stick.set_led_count(led_count)
             else:
                 print("Error: Invalid led-count parameter value")
@@ -288,7 +289,7 @@ def main():
                     try:
                         int(color, 16)
                         fargs['hex'] = "#" + color
-                    except:
+                    except ValueError:
                         fargs['name'] = color
                 else:
                     fargs['name'] = color
@@ -311,7 +312,6 @@ def main():
                 fargs['duration'] = options.duration
 
             func(**fargs)
-
 
         else:
             parser.print_help()
