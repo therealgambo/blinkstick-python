@@ -1,5 +1,5 @@
-from blinkstick.BlinkStick import get_first
-from blinkstick.AsyncBlinkStick import AsyncBlinkStick
+from blinkstick.blinkstick import get_first
+from blinkstick.asyncio import AsyncBlinkStick
 
 import asyncio
 

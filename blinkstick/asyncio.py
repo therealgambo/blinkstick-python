@@ -1,4 +1,4 @@
-from blinkstick.BlinkStick import BlinkStick, blinkstick_remap_rgb_value_reverse
+from blinkstick.blinkstick import BlinkStick, blinkstick_remap_rgb_value_reverse
 
 import asyncio
 

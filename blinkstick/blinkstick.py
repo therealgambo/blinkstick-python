@@ -1,6 +1,6 @@
 from random import randint
 from blinkstick._version import __version__
-from blinkstick.BlinkStickException import BlinkStickException
+from blinkstick.exception import BlinkStickException
 
 import time
 import sys

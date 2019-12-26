@@ -1,4 +1,4 @@
-from blinkstick.BlinkStick import get_first, get_by_serial, blinkstick_remap_color
+from blinkstick.blinkstick import get_first, get_by_serial, blinkstick_remap_color
 
 import time
 

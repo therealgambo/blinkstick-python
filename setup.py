@@ -1,49 +1,59 @@
 #!/usr/bin/env python
-import os
+import codecs
+import os.path
 import re
 import sys
+
 from setuptools import setup, find_packages
 
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+here = os.path.abspath(os.path.dirname(__file__))
 
 
-PKG = 'blinkstick'
-VERSIONFILE = os.path.join(PKG, "_version.py")
-verstr = "unknown"
-try:
-    verstrline = open(VERSIONFILE, "rt").read()
-except EnvironmentError:
-    pass  # Okay, there is no version file.
-else:
-    VSRE = r"(\d+\.\d+\.\d+)"
-    mo = re.search(VSRE, verstrline, re.M)
-    if mo:
-        verstr = mo.group(1)
-    else:
-        print("unable to find version in {0}").format(VERSIONFILE)
-        raise RuntimeError("if {0}.py exists, it is required to be well-formed".format(VERSIONFILE))
+def read(*parts):
+    return codecs.open(os.path.join(here, *parts), 'r').read()
+
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
 
 if sys.platform == "win32":
-    os_requires = [
+    install_requires = [
         "pywinusb"
     ]
 else:
-    os_requires = [
-        "pyusb==1.0.0"
+    install_requires = [
+        "pyusb>=1.0.0"
     ]
 
-setup(
-    name='BlinkStick',
-    version=verstr,
-    author='Arvydas Juskevicius',
-    author_email='arvydas@arvydas.co.uk',
-    packages=find_packages(),
-    scripts=["bin/blinkstick"],
-    url='http://pypi.python.org/pypi/BlinkStick/',
-    license='LICENSE.txt',
+setup_options = dict(
+    name='blinkstick',
+    version=find_version("blinkstick", "__version__.py"),
     description='Python package to control BlinkStick USB devices.',
     long_description=read('README.rst'),
-    install_requires=os_requires,
+    author='Arvydas Juskevicius',
+    author_email='arvydas@arvydas.co.uk',
+    url='http://pypi.python.org/pypi/BlinkStick/',
+    scripts=['bin/blinkstick'],
+    packages=find_packages(exclude=['tests*']),
+    install_requires=install_requires,
+    license="LICENSE.txt",
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+    ],
 )
+
+setup(**setup_options)
+

@@ -1,5 +1,5 @@
-from blinkstick.BlinkStickPro import BlinkStickPro
-from blinkstick.BlinkStick import blinkstick_remap_color
+from blinkstick.pro import BlinkStickPro
+from blinkstick.blinkstick import blinkstick_remap_color
 
 
 class BlinkStickProMatrix(BlinkStickPro):
